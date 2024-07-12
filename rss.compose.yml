@@ -1,0 +1,30 @@
+services:
+  miniflux:
+    image: miniflux/miniflux:latest
+    restart: always
+    healthcheck:
+      test: ["CMD", "/usr/bin/miniflux", "-healthcheck", "auto"]
+    ports:
+      - "8080:8080"
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      - DATABASE_URL=postgres://miniflux:create_your_password@db/miniflux?sslmode=disable
+      - RUN_MIGRATIONS=1
+      - FETCH_YOUTUBE_WATCH_TIME=1
+      - LOG_DATE_TIME=true
+      - BASE_URL=https://rss.homelab.mariovictor.dev
+  db:
+    image: postgres:15
+    restart: always
+    environment:
+      - POSTGRES_USER=miniflux
+      - POSTGRES_PASSWORD=create_your_password
+      - POSTGRES_DB=miniflux
+    volumes:
+      - ./data/miniflux/postgres:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "miniflux"]
+      interval: 10s
+      start_period: 30s

@@ -1,0 +1,27 @@
+services:
+  portainer:
+    image: portainer/portainer-ce
+    restart: always
+    ports:
+      - 9443:9443
+      - 8000:8000
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /path_to_data/portainer:/data
+
+  proxy:
+    image: jc21/nginx-proxy-manager:latest
+    restart: unless-stopped
+    ports:
+      - 80:80
+      - 81:81
+      - 443:443
+    volumes:
+      - /path_to_data/data:/data
+      - /path_to_data/letsencrypt:/etc/letsencrypt
+
+  watchtower:
+    image: containrrr/watchtower
+    restart: always
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
